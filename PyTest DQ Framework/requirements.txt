@@ -1,0 +1,6 @@
+# clarify version later
+pytest
+pandas
+pyarrow
+psycopg2-binary
+pytest-html

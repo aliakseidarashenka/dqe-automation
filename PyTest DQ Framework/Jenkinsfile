@@ -18,8 +18,8 @@ pipeline {
                 sh '''
                     python3 -m venv venv
                     . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r "PyTest DQ Framework/requirements.txt"
+                    python -m pip install --upgrade pip
+                    python -m pip install -r "PyTest DQ Framework/requirements.txt"
                 '''
             }
         }
@@ -30,7 +30,7 @@ pipeline {
                     . venv/bin/activate
                     export PYTHONPATH="$WORKSPACE/PyTest DQ Framework"
 
-                    pytest "PyTest DQ Framework/tests/dq_checks/parquet_files" \
+                    python -m pytest "PyTest DQ Framework/tests/dq_checks/parquet_files" \
                       --db_host=host.containers.internal \
                       --db_port=5434 \
                       --db_name=mydatabase \
@@ -47,13 +47,6 @@ pipeline {
         always {
             echo 'Pipeline execution completed.'
             archiveArtifacts artifacts: 'PyTest DQ Framework/report.html', allowEmptyArchive: true
-            publishHTML(target: [
-                allowMissing: true,
-                keepAll: true,
-                reportDir: 'PyTest DQ Framework',
-                reportFiles: 'report.html',
-                reportName: 'PyTest DQ Report'
-            ])
         }
         success {
             echo 'PyTest DQ pipeline executed successfully!'

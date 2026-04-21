@@ -1,56 +1,75 @@
 pipeline {
+
     agent any
 
     environment {
         POSTGRES_SECRET = credentials('jenkins-postgres-credentials')
+        REPO_URL = 'https://github.com/aliakseidarashenka/dqe-automation.git'
     }
 
     stages {
-        stage('Update Packages') {
+
+        stage('Clean Workspace') {
             steps {
-                script {
-                    sh 'apt-get update'
-                    sh 'apt-get install -y libpq-dev python3 python3-pip python3-venv'
-                }
+                deleteDir()
             }
         }
 
-        stage('Clone Repository') {
+        stage('Clone Repo') {
             steps {
-                script {
-                    git branch: 'main', url: 'https://github.com/aliakseidarashenka/dqe-automation.git'
+                sh '''
+                echo "Cloning repository into workspace root..."
+                git clone ${REPO_URL} .
+                echo "Workspace content after clone:"
+                ls -la
+                '''
+            }
+        }
+
+        stage('Prepare Parquet Data') {
+            steps {
+                dir("PyTest DQ Framework") {
+                    sh '''
+                    echo "Preparing parquet data for test execution..."
+
+                    rm -rf parquet_data
+
+                    cp -r /parquet_data .
+
+                    echo "Verifying parquet_data structure:"
+                    ls -la parquet_data
+                    '''
                 }
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                script {
+                dir("PyTest DQ Framework") {
                     sh '''
-                        python3 -m venv venv
-                        . venv/bin/activate
-                        pip install --upgrade pip
-                        pip install -r "PyTest DQ Framework/requirements.txt"
+                    echo "Installing project dependencies..."
+
+                    python3 -m pip install --break-system-packages setuptools wheel
+                    python3 -m pip install --break-system-packages -r requirements.txt
                     '''
                 }
             }
         }
 
-        stage('Run PyTest DQ Tests') {
+        stage('Run Tests') {
             steps {
-                script {
+                dir("PyTest DQ Framework") {
                     sh '''
-                        . venv/bin/activate
-                        export PYTHONPATH="$WORKSPACE/PyTest DQ Framework"
+                    echo "Executing pytest test suite..."
 
-                        pytest "PyTest DQ Framework/tests/dq_checks/parquet_files" \
-                          --db_host=postgres \
-                          --db_port=5432 \
-                          --db_name=mydatabase \
-                          --db_user=$POSTGRES_SECRET_USR \
-                          --db_password=$POSTGRES_SECRET_PSW \
-                          --html="PyTest DQ Framework/report.html" \
-                          --self-contained-html
+                    pytest tests \
+                        --db_host=host.containers.internal \
+                        --db_port=5434 \
+                        --db_name=mydatabase \
+                        --db_user=$POSTGRES_SECRET_USR \
+                        --db_password=$POSTGRES_SECRET_PSW \
+                        --html=html_report/report.html \
+                        --self-contained-html
                     '''
                 }
             }
@@ -59,23 +78,17 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: 'PyTest DQ Framework/report.html', allowEmptyArchive: true
+            dir("PyTest DQ Framework") {
+                archiveArtifacts artifacts: 'html_report/**', allowEmptyArchive: true
 
-            publishHTML(target: [
-                allowMissing: true,
-                keepAll: true,
-                reportDir: 'PyTest DQ Framework',
-                reportFiles: 'report.html',
-                reportName: 'PyTest DQ Report'
-            ])
-
-            echo 'Pipeline execution completed.'
-        }
-        success {
-            echo 'PyTest DQ pipeline executed successfully!'
-        }
-        failure {
-            echo 'PyTest DQ pipeline failed. Please check the logs for details.'
+                publishHTML(target: [
+                    allowMissing: true,
+                    keepAll: true,
+                    reportDir: 'html_report',
+                    reportFiles: 'report.html',
+                    reportName: 'HTML Test Report'
+                ])
+            }
         }
     }
 }

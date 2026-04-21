@@ -11,10 +11,11 @@ pytestmark = [pytest.mark.facility_name_min_time_spent_per_visit_date, pytest.ma
 
 @pytest.fixture(scope="module")
 def target_data(parquet_reader):
-    """
-        Load parquet dataset 
-    """
-    return parquet_reader.read("facility_name_min_time_spent_per_visit_date")
+    path = os.path.join(
+        os.path.dirname(__file__),
+        "../../parquet_data/facility_name_min_time_spent_per_visit_date"
+    )
+    return parquet_reader.process(path)
 
 
 # BASIC DQ CHECKS

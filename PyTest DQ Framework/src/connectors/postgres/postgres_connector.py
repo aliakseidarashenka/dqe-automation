@@ -1,7 +1,6 @@
 import psycopg2
 import pandas as pd
 
-
 class PostgresConnectorContextManager:
     def __init__(self, db_host: str, db_name: str, db_user: str, db_password: str, db_port: int):
         self.db_host = db_host
@@ -25,9 +24,15 @@ class PostgresConnectorContextManager:
         if self.connection:
             self.connection.close()
 
-    def get_data_sql(self, sql: str) -> pd.DataFrame:
+    def get_data_sql(self, sql):
+        # exec query, result = pandas df
+        """
+        Execute SQL query and return result as pandas DataFrame
+        """
         try:
             df = pd.read_sql(sql, self.connection)
             return df
         except Exception as e:
             raise Exception(f"Error executing SQL: {e}")
+
+

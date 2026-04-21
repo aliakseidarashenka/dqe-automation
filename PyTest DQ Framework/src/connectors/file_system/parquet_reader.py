@@ -33,12 +33,19 @@ class ParquetReader:
             raise FileNotFoundError(f"Parquet path not found: {full_path}")
 
         try:
-            # This works for BOTH:
-            # - single .parquet file
-            # - partitioned folder dataset
             return pd.read_parquet(full_path, columns=columns)
         except Exception as e:
             raise RuntimeError(f"Failed to read parquet from {full_path}: {e}")
+
+    def process(self, path: str, include_subfolders: bool = False) -> pd.DataFrame:
+        """
+        Compatibility method used by tests/framework.
+
+        :param path: Path to parquet file or dataset folder
+        :param include_subfolders: Reserved for future use
+        :return: pandas DataFrame
+        """
+        return self.read(path)
 
     def read_filtered(self, file_path: str, filters: dict) -> pd.DataFrame:
         """

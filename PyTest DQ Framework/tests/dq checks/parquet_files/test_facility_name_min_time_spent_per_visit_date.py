@@ -44,7 +44,7 @@ def test_check_duplicates(target_data, data_quality_library):
         column_names=["facility_name", "visit_date", "min_time_spent"]
     )
 
-# Business logic check
+# Bussiness logic
 @pytest.fixture(scope="module")
 def source_data(db_connection):
     query = """
@@ -70,19 +70,16 @@ def test_check_count_source_vs_target(source_data, target_data, data_quality_lib
 
 
 def test_parquet_vs_db_data_match(
+    source_data,
     target_data,
-    db_connection,
     data_quality_library
 ):
     """Parquet data should fully match DB aggregation"""
 
-    source_data = source_data(db_connection)
-
     data_quality_library.check_data_full_data_set(
-        target_data,
         source_data,
-        key_columns=["facility_type", "visit_date"],
+        target_data,
+        key_columns=["facility_name", "visit_date"],
         compare_columns=["min_time_spent"]
     )
-
 

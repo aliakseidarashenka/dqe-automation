@@ -76,7 +76,7 @@ def test_parquet_vs_db_data_match(
 ):
     """Parquet data should fully match DB aggregation"""
 
-    source_data = get_avg_visit_data(db_connection)
+    source_data = source_data(db_connection)
 
     data_quality_library.check_data_full_data_set(
         target_data,

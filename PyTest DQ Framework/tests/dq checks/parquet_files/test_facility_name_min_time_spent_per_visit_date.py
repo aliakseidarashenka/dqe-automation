@@ -68,7 +68,6 @@ def test_check_count_source_vs_target(source_data, target_data, data_quality_lib
     """
     data_quality_library.check_count(source_data, target_data)
 
-
 def test_parquet_vs_db_data_match(
     source_data,
     target_data,
@@ -82,4 +81,3 @@ def test_parquet_vs_db_data_match(
         key_columns=["facility_name", "visit_date"],
         compare_columns=["min_time_spent"]
     )
-

@@ -132,7 +132,7 @@ def process_doughnut(driver: WebDriver):
 
 if __name__ == "__main__":
     with SeleniumWebDriverContextManager() as driver:
-        file_path = os.path.abspath("report.html")
+        file_path = os.path.abspath("../Robot Framework/data/report.html")
         driver.get(f"file:///{file_path.replace(os.sep, '/')}")
 
         save_table(driver)

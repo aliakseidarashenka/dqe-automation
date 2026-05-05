@@ -39,19 +39,22 @@ def read_html_table(html_path) -> pd.DataFrame:
         "Average Time Spent": "avg_time_spent",
     })
 
+    if filter_date:
+        df = df[df["visit_date"] == filter_date]
+
     return df
 
 # func for reading parquet by the link
 def read_parquet_dataset(parquet_folder, filter_date: str | None = None) -> pd.DataFrame:
     df = pd.read_parquet(parquet_folder)
 
-    if filter_date:
-        df = df[df["visit_date"].astype(str) == filter_date]
-
     df = df[["facility_type", "visit_date", "avg_time_spent"]]
 
     df["visit_date"] = df["visit_date"].astype(str)
     df["avg_time_spent"] = df["avg_time_spent"].astype(float)
+
+    if filter_date:
+        df = df[df["visit_date"] == filter_date]
 
     return df
 

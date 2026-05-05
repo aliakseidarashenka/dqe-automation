@@ -4,7 +4,7 @@ import re
 import pandas as pd
 
 # func for reading html plotly table
-def read_html_table(html_path) -> pd.DataFrame:
+def read_html_table(html_path: str, filter_date: str = None) -> pd.DataFrame:
     with open(html_path, "r", encoding="utf-8") as file:
         html = file.read()
 
